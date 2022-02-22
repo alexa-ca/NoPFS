@@ -1,20 +1,26 @@
-# HDMLP: Hierarchical Distributed Machine Learning Prefetcher
+# NoPFS - Near-optimal Prefetching System
 
-**Note: This is the initial research version of NoPFS. See the main branch for current code.**
+This repository is based on the initial version of [NoPFS](https://github.com/spcl/NoPFS).
 
-## Installation
-Using setuptools:
-- Clone this repo using ```git clone```
-- Run ```python setup.py install```
+For specific configuration and run-time settings for various machines,
+take a look at the [meta](/meta) subdirectory.
 
-### Non-default libconfig location
+## Install NoPFS
+```
+git clone https://github.com/alexa-ca/NoPFS.git
+cd NoPFS
+python setup.py install 
+```
+
+
+#### Non-default libconfig location
 If libconfig is installed in a non-default location (`$libconfig_install_location`), you need to export the following environment variables before running the install script:
 ```
 export CMAKE_PREFIX_PATH=$libconfig_install_location:$CMAKE_PREFIX_PATH
 export CPATH=$CPATH:$libconfig_install_location/include
 ```
 
-### Non-default OpenCV location
+#### Non-default OpenCV location
 If OpenCV is installed in a non-default location (`$opencv_install_location`), the environment variable `OpenCV_DIR` needs to be set to:
 ```
 export OpenCV_DIR=$opencv_install_location/lib64/cmake/opencv4/
