@@ -39,6 +39,8 @@ def get_args():
                         help='Do not evaluate on validation set each epoch')
     parser.add_argument('--save-stats', default=False, action='store_true',
                         help='Save all performance statistics to files')
+    parser.add_argument('--cache-dir', type=str, required=True,
+                        help='Directory (on local disk/PFS) containing cached data')
 
     # Data/training details.
     parser.add_argument('--data-dir', type=str, required=True,
@@ -469,7 +471,7 @@ class RandomDataset(torch.utils.data.Dataset):
 class CachedImageFolder(torchvision.datasets.VisionDataset):
     """Like a regular ImageFolder, but supports caching metadata."""
 
-    def __init__(self, root,
+    def __init__(self, root, cache_dir,
                  loader=torchvision.datasets.folder.pil_loader,
                  transform=None, target_transform=None,
                  is_valid_file=None):
@@ -483,14 +485,17 @@ class CachedImageFolder(torchvision.datasets.VisionDataset):
 
         # Load cache if present.
         # TODO: Handle creating cache with multiple processes.
-        cache_file = os.path.join(root, 'filelist.pickle')
+        if not(os.path.exists(cache_dir) and os.path.isdir(cache_dir)):
+            os.makedirs(cache_dir)
+        cache_file = os.path.join(cache_dir, 'filelist.pickle')
         if os.path.exists(cache_file):
             with open(cache_file, 'rb') as f:
                 classes, class_to_idx, samples = pickle.load(f)
         else:
             classes, class_to_idx = self._find_classes(self.root)
             samples = torchvision.datasets.folder.make_dataset(
-                self.root, class_to_idx, extensions, is_valid_file)
+                self.root, class_to_idx, extensions,
+                is_valid_file = is_valid_file)
             if len(samples) == 0:
                 raise RuntimeError(f'Found zero files in {self.root} subdirs')
 
@@ -870,8 +875,8 @@ def main():
     else:
         criterion = torch.nn.CrossEntropyLoss().to(get_cuda_device())
     # Optimizer.
-    optimizer = apex.optimizers.FusedSGD(
-        group_weight_decay(net, args.decay, ['bn']),
+    optimizer = torch.optim.SGD(
+        net.parameters(),
         args.start_lr,
         args.momentum)
     # Set up learning rate schedule.
@@ -993,12 +998,12 @@ def main():
                     transform=validation_transform)
                 num_val_samples = num_samples
         else:
-            train_dataset = CachedImageFolder(data_dir, transform=train_transform)
+            train_dataset = CachedImageFolder(data_dir, args.cache_dir, transform=train_transform)
             num_train_samples = len(train_dataset)
             num_val_samples = 0
             if not args.no_eval:
                 validation_dataset = CachedImageFolder(os.path.join(
-                    args.data_dir, 'val'), transform=validation_transform)
+                    args.data_dir, 'val'), args.cache_dir, transform=validation_transform)
                 num_val_samples = len(validation_dataset)
         if args.dist:
             train_sampler = torch.utils.data.distributed.DistributedSampler(
