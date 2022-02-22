@@ -875,8 +875,8 @@ def main():
     else:
         criterion = torch.nn.CrossEntropyLoss().to(get_cuda_device())
     # Optimizer.
-    optimizer = apex.optimizers.FusedSGD(
-        group_weight_decay(net, args.decay, ['bn']),
+    optimizer = torch.optim.SGD(
+        net.parameters(),
         args.start_lr,
         args.momentum)
     # Set up learning rate schedule.
