@@ -484,9 +484,9 @@ class CachedImageFolder(torchvision.datasets.VisionDataset):
             extensions = None
 
         # Load cache if present.
-        # TODO: Handle creating cache with multiple processes.
+        cache_dir = os.path.join(cache_dir, f"rank{get_local_rank()}")
         if not(os.path.exists(cache_dir) and os.path.isdir(cache_dir)):
-            os.makedirs(cache_dir)
+            os.makedirs(cache_dir, exist_ok=True)
         cache_file = os.path.join(cache_dir, 'filelist.pickle')
         if os.path.exists(cache_file):
             with open(cache_file, 'rb') as f:
