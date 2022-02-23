@@ -19,6 +19,9 @@ python ${NOPFS_ROOT}/benchmark/resnet50.py \
   --cache-dir ${CACHE_DIR} \
   --dataset imagenet \
   --drop-last \
-  --batch-size 64 \
-  --epochs 1 \
+  --batch-size 256 \
+  --epochs 3 \
+  --workers 16 \
+  --hdmlp \
+  --hdmlp-config-path ${NOPFS_ROOT}/meta/config_styx.cfg \
   --dist

@@ -59,9 +59,15 @@ mpirun -np 2  \
     --drop-last \
     --batch-size 64 \
     --epochs 1 \
+    --hdmlp \
+    --hdmlp-config-path ${NOPFS_ROOT}/meta/config_styx.cfg \
     --dist
 ```
 
+The specific configuration of each machine should be written to a file similar to `meta/config_styx.cfg`.
+More examples can be found in `libhdmlp/data`.
+
 Alternatively execute the following [script](/meta/resnet50_styx.sh).
 
+Remove the `--hdmlp`-related flags to disable NoPFS (also called `hdmlp`).
 Add `--no-prefetch` to the command to compare to baseline execution without prefetching.
